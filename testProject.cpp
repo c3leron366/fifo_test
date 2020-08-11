@@ -2,83 +2,159 @@
 //
 
 #include <iostream>
+#include <string>
 #include "test_fifo.h"
 
-int main()
+unsigned char test[] = "test";
+const unsigned int fifo_depth = 3;
+const unsigned int packet_size = 10;
+const unsigned int fifo_size = 200;
+test_fifo< fifo_depth, packet_size, fifo_size > t;
+
+
+bool test_push_too_many_times()
 {
+    int errors = 0;
+
+    
+    for (int id = 0; id < fifo_depth + 1; id++)
+    {
+
+        if (t.Push(test, sizeof(test), id) == false)
+            errors += 1;
+       
+        test[0] += 1;
+        std::cout << "in: " << t.in << std::endl;
+        //std::cout << id << ' ' << errors << std::endl;
+    }
+
+    if (errors == 1)
+        return true;
+    else
+        return false;
+}
+
+bool test_pop_too_many_times()
+{
+    int errors = 0;
     unsigned char kek[40];
     unsigned int data_count;
     unsigned int packet_id;
-    test_fifo< 40, 10, 40 > t;
+    
+    //std::cout << "test_pop_too_many_times" << std::endl;
+    for (int id = 0; id < fifo_depth + 1; id++)
+    {
 
-    test_fifo< 10, 10, 10 > t2;
-    
+        if (t.Pop(kek,sizeof(kek), data_count, packet_id) == false)
+            errors += 1;
+
+        test[0] += 1;
+        std::cout << "out: " << t.out << std::endl;
+        //std::cout << id << ' ' << errors << std::endl;
+    }
+
+    if (errors == 1)
+        return true;
+    else
+        return false;
+}
+
+
+bool test_push_then_pop_same_times()
+{
+    int errors = 0;
+    unsigned char kek[40];
+    unsigned int data_count;
+    unsigned int packet_id;
+
+    for (int id = 0; id < fifo_depth + 1; id++)
+    {
+        if (t.Push(test, sizeof(test), id) == false)
+            errors += 1;
+        std::cout << "count: " << t.count << std::endl;
+        if (t.Pop((unsigned char*)kek, 8, data_count, packet_id) == false)
+            errors += 1;
+        std::cout << "count: " << t.count << std::endl;
+        test[0] += 1;
+    }
+    if (errors = 1)
+        return true;
+    else
+        return false;
+}
+
+
+
+int main()
+{    
+    unsigned int errors = 0;
+ 
     std::cout << sizeof(t) << std::endl;
-    std::cout << sizeof(t2) << std::endl;
-    unsigned char test[] = "test";
+    std::cout << t.max_fifo_depth << std::endl;
+    std::cout << 0 % 3 << std::endl;
+    std::cout << 1 % 3 << std::endl;
+    std::cout << 2 % 3 << std::endl;
+    std::cout << 3 % 3 << std::endl;
+
+
+    for (int i = 0;i < 10;i++)
+    {
+        if (!test_push_too_many_times())
+            std::cout << "test_push_too_many_times......FAILED" << std::endl;
+        else
+            std::cout << "test_push_too_many_times......OK" << std::endl;
+        
+        if (!test_pop_too_many_times())
+            std::cout << "test_pop_too_many_times.......FAILED" << std::endl;
+        else
+            std::cout << "test_pop_too_many_times.......OK" << std::endl;
+        
+        if (!test_push_then_pop_same_times())
+            std::cout << "test_push_then_pop_same_times.......FAILED" << std::endl;
+        else
+            std::cout << "test_push_then_pop_same_times.......OK" << std::endl;
+    }
+
     
+
+
+    /*
     int id = 0;
     
-    if (t.Push(test, 4, id) == false)
-        std::cout << "push error" << std::endl;
-    else
-        std::cout << "push ok" << std::endl;
-    if (t.Pop((unsigned char*)kek, 40, data_count, packet_id) == false)
-        std::cout << "pop error" << std::endl;
-    else {
-        std::cout << "packet id:" << packet_id << std::endl;
-        std::cout << "data count:" << data_count << std::endl;
-        std::cout << "string:" << kek << std::endl;
-    }
-    if (t.Pop((unsigned char*)kek, 40, data_count, packet_id) == false)
-        std::cout << "pop error" << std::endl;
-    else {
-        std::cout << "packet id:" << packet_id << std::endl;
-        std::cout << "data count:" << data_count << std::endl;
-        std::cout << "string:" << kek << std::endl;
-    }
-
-    for (id = 0;id < 20;id++)
+    for (int id = 0;id < 7;id++)
     {
-        if (t.Push(test, 4, id) == false)
+        if (t.Push(test, sizeof(test), id) == false)
+        {
             std::cout << "push error" << std::endl;
+            errors += 1;
+        }
         else
+        {
             std::cout << "push ok" << std::endl;
+        }
+        test[0] += 1;
     }
     
+    for (id = 0; id < 20; id++)
+    {
+        if (t.Pop((unsigned char*)kek, 8, data_count, packet_id) == false)
+        {
+            //std::cout << "pop error" << std::endl;
+            errors += 1;
+        }
+        else 
+        {
+            //std::cout << "packet id:" << packet_id << std::endl;
+            if (packet_id != id)
+                errors += 1;
+        }
+    }
+
     
-    for (id = 0;id < 20;id++)
-    {
-        if (t.Pop((unsigned char*)kek, 40, data_count, packet_id) == false)
-            std::cout << "pop error" << std::endl;
-        else {
-            std::cout << "packet id:" << packet_id << std::endl;
-            std::cout << "data count:" << data_count << std::endl;
-            std::cout << "string:" << kek << std::endl;
-        }
-        
-    }
-    for (id = 0;id < 20;id++)
-    {
-        if (t.Push(test, 4, id) == false)
-            std::cout << "push error" << std::endl;
-        else
-            std::cout << "push ok" << std::endl;
-            
-    }
-
-
-    for (id = 0;id < 20;id++)
-    {
-        if (t.Pop((unsigned char*)kek, 40, data_count, packet_id) == false)
-            std::cout << "pop error" << std::endl;
-        else {
-            std::cout << "packet id:" << packet_id << std::endl;
-            std::cout << "data count:" << data_count << std::endl;
-            std::cout << "string:" << kek << std::endl;
-        }
-
-    }
+    id = 0;
+    
+    */
+    return 0;   
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
