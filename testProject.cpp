@@ -24,14 +24,40 @@ bool test_push_too_many_times()
             errors += 1;
        
         test[0] += 1;
-        std::cout << "in: " << t.in << std::endl;
-        //std::cout << id << ' ' << errors << std::endl;
+        //std::cout << "in: " << t.in << std::endl;
     }
 
     if (errors == 1)
         return true;
     else
         return false;
+}
+
+
+bool test_pop_size_issue()
+{
+    int errors = 0;
+    
+    unsigned int data_count;
+    unsigned int packet_id;
+    unsigned char kek[2];
+    
+    if (t.Push(test, sizeof(test), 1356) == false)
+        errors += 1;
+    
+    try 
+    {
+        t.Pop(kek, sizeof(kek), data_count, packet_id);
+    }
+    catch (...)
+    {
+        errors += 1;
+    }
+        
+    if (errors > 0)
+        return false;
+    else
+        return true;
 }
 
 bool test_pop_too_many_times()
@@ -49,8 +75,7 @@ bool test_pop_too_many_times()
             errors += 1;
 
         test[0] += 1;
-        std::cout << "out: " << t.out << std::endl;
-        //std::cout << id << ' ' << errors << std::endl;
+        //std::cout << "out: " << t.out << std::endl;
     }
 
     if (errors == 1)
@@ -71,13 +96,13 @@ bool test_push_then_pop_same_times()
     {
         if (t.Push(test, sizeof(test), id) == false)
             errors += 1;
-        std::cout << "count: " << t.count << std::endl;
+        //std::cout << "count: " << t.count << std::endl;
         if (t.Pop((unsigned char*)kek, 8, data_count, packet_id) == false)
             errors += 1;
-        std::cout << "count: " << t.count << std::endl;
+        //std::cout << "count: " << t.count << std::endl;
         test[0] += 1;
     }
-    if (errors = 1)
+    if (errors == 0)
         return true;
     else
         return false;
@@ -103,17 +128,22 @@ int main()
             std::cout << "test_push_too_many_times......FAILED" << std::endl;
         else
             std::cout << "test_push_too_many_times......OK" << std::endl;
-        
+
         if (!test_pop_too_many_times())
             std::cout << "test_pop_too_many_times.......FAILED" << std::endl;
         else
             std::cout << "test_pop_too_many_times.......OK" << std::endl;
-        
-        if (!test_push_then_pop_same_times())
-            std::cout << "test_push_then_pop_same_times.......FAILED" << std::endl;
-        else
-            std::cout << "test_push_then_pop_same_times.......OK" << std::endl;
     }
+    if (!test_push_then_pop_same_times())
+        std::cout << "test_push_then_pop_same_times.......FAILED" << std::endl;
+    else
+        std::cout << "test_push_then_pop_same_times.......OK" << std::endl;
+        
+    if (!test_pop_size_issue())
+        std::cout << "test_pop_size_issue.......FAILED" << std::endl;
+    else
+        std::cout << "test_pop_size_issue.......OK" << std::endl;
+    
 
     
 

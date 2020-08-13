@@ -112,8 +112,7 @@ public:
 		total_size -= dataCount;
 		packetId = queue[out].id;
 		std::memset(buffer, 0, bufferSize);
-		//std::memcpy(buffer, queue[out].payload, dataCount);
-		std::memcpy(buffer, queue[out].payload, bufferSize < dataCount ? dataCount: bufferSize);
+		std::memcpy(buffer, queue[out].payload, bufferSize > dataCount ? dataCount: bufferSize);
 		count -= 1;
 		out = (out + 1) % max_fifo_depth;
 		
